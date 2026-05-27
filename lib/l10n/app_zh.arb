@@ -828,5 +828,20 @@
   "sleepTimerSheetSpecificStartButton": "启动定时器",
   "sleepTimerSheetSpecificStartButtonPassed": "已过",
   "timeAm": "上午",
-  "timePm": "下午"
+  "timePm": "下午",
+
+  "sectionClientCertificate": "客户端证书",
+  "clientCertNone": "未配置证书",
+  "clientCertLoaded": "证书已加载",
+  "clientCertImport": "导入 P12 证书",
+  "clientCertRemove": "删除证书",
+  "clientCertRemoveTitle": "删除客户端证书？",
+  "clientCertRemoveConfirm": "证书将从安全存储中删除。",
+  "clientCertPassword": "证书密码",
+  "clientCertPasswordHint": "无密码请留空",
+  "clientCertImportSuccess": "证书导入成功",
+  "clientCertImportFailed": "导入失败，请检查密码。",
+  "clientCertImportWrongPassword": "密码错误或 P12 文件无效",
+  "clientCertInfoTitle": "客户端证书（mTLS）",
+  "clientCertInfoContent": "导入 PKCS12（.p12）客户端证书，用于与需要双向 TLS 的服务器进行身份验证。证书和密码将加密存储。"
 }

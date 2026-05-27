@@ -25,6 +25,7 @@ import '../screens/admin_screen.dart';
 import '../screens/downloads_screen.dart';
 import '../screens/bookmarks_screen.dart';
 import '../main.dart' show applyThemeMode, applyTrustAllCerts, localeNotifier, oledNotifier, snappyTransitionsNotifier;
+import '../services/mtls_service.dart';
 import '../services/wording.dart';
 import '../widgets/absorb_page_header.dart';
 import '../widgets/absorb_slider.dart';
@@ -105,6 +106,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
   late final TextEditingController _localServerController;
   bool _trustAllCerts = false;
   bool _includePreReleases = false;
+  String? _certFilename;
+  bool _certLoaded = false;
   String? _rmabBaseUrl;
   String? _rmabApiToken;
   bool _loaded = false;
@@ -432,6 +435,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
       _shakeSensitivity = shakeSens;
       _language = language;
       _canPickDownloadLocation = !_isPlayStoreBuild;
+      _certLoaded = MtlsService.hasCert;
+      _certFilename = MtlsService.p12Filename;
 
       _loaded = true;
     });
@@ -557,6 +562,117 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Future<void> _saveRewind(AutoRewindSettings s) async {
     setState(() => _rewindSettings = s);
     await s.save();
+  }
+
+  Future<void> _importClientCert() async {
+    final l = AppLocalizations.of(context)!;
+    // Pick a .p12 or .pfx file
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['p12', 'pfx'],
+      withData: true,
+    );
+    if (result == null || result.files.isEmpty) return;
+    final file = result.files.first;
+    if (file.bytes == null) return;
+
+    // Ask for password
+    final passwordController = TextEditingController();
+    bool obscure = true;
+    if (!mounted) return;
+    final password = await showDialog<String>(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setS) => AlertDialog(
+          title: Text(l.clientCertPassword),
+          content: TextField(
+            controller: passwordController,
+            obscureText: obscure,
+            decoration: InputDecoration(
+              hintText: l.clientCertPasswordHint,
+              suffixIcon: IconButton(
+                icon: Icon(obscure ? Icons.visibility_off : Icons.visibility),
+                onPressed: () => setS(() => obscure = !obscure),
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: Text(l.cancel),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(ctx, passwordController.text),
+              child: Text(l.done),
+            ),
+          ],
+        ),
+      ),
+    );
+    passwordController.dispose();
+    if (password == null) return;
+
+    try {
+      await MtlsService.importP12(
+        file.bytes!.toList(),
+        password,
+        file.name,
+      );
+      // Push cert to ExoPlayer on Android
+      if (Platform.isAndroid && MtlsService.p12Bytes != null) {
+        await AudioPlayer.configureMtls(
+          Uint8List.fromList(MtlsService.p12Bytes!),
+          password,
+        );
+      }
+      if (!mounted) return;
+      setState(() {
+        _certLoaded = true;
+        _certFilename = file.name;
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(l.clientCertImportSuccess),
+        ));
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(l.clientCertImportFailed),
+        backgroundColor: Theme.of(context).colorScheme.error,
+      ));
+    }
+  }
+
+  Future<void> _removeClientCert(BuildContext context) async {
+    final l = AppLocalizations.of(context)!;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l.clientCertRemoveTitle),
+        content: Text(l.clientCertRemoveConfirm),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(l.cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(l.remove),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    await MtlsService.remove();
+    if (Platform.isAndroid) {
+      await AudioPlayer.configureMtls(null, null);
+    }
+    if (!mounted) return;
+    setState(() {
+      _certLoaded = false;
+      _certFilename = null;
+    });
   }
 
   @override
@@ -2229,6 +2345,30 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         await PlayerSettings.setTrustAllCerts(v);
                         applyTrustAllCerts(v);
                       } : null,
+                    ),
+                    const Divider(height: 1, indent: 16, endIndent: 16),
+                    ListTile(
+                      leading: Icon(Icons.verified_user_rounded, color: _certLoaded ? Colors.greenAccent.shade400 : cs.onSurfaceVariant),
+                      title: Row(children: [
+                        Flexible(child: Text(l.sectionClientCertificate)),
+                        _infoIcon(l.clientCertInfoTitle, l.clientCertInfoContent),
+                      ]),
+                      subtitle: Text(
+                        _certLoaded
+                            ? '${l.clientCertLoaded}: ${_certFilename ?? ''}'
+                            : l.clientCertNone,
+                        style: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant)),
+                      trailing: _certLoaded
+                          ? IconButton(
+                              icon: Icon(Icons.delete_outline_rounded, color: cs.error),
+                              tooltip: l.clientCertRemove,
+                              onPressed: _loaded ? () => _removeClientCert(context) : null,
+                            )
+                          : IconButton(
+                              icon: Icon(Icons.upload_file_rounded, color: cs.primary),
+                              tooltip: l.clientCertImport,
+                              onPressed: _loaded ? _importClientCert : null,
+                            ),
                     ),
                     if (_isGithubBuild) ...[
                       const Divider(height: 1, indent: 16, endIndent: 16),

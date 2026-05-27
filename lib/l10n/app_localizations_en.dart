@@ -2805,7 +2805,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String autoSleepTimerEnabledSubtitle(
-      String start, String end, String duration) {
+    String start,
+    String end,
+    String duration,
+  ) {
     return '$start – $end · $duration';
   }
 
@@ -4180,7 +4183,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String statsScreenDateAtTime(
-      String month, int day, int year, int hour, String minute, String ampm) {
+    String month,
+    int day,
+    int year,
+    int hour,
+    String minute,
+    String ampm,
+  ) {
     return '$month $day, $year at $hour:$minute $ampm';
   }
 
@@ -4391,7 +4400,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String audibleSeriesSummaryWithUpcoming(
-      int total, int missing, int upcoming) {
+    int total,
+    int missing,
+    int upcoming,
+  ) {
     return '$total on Audible · $missing missing · $upcoming upcoming';
   }
 
@@ -5151,7 +5163,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String upcomingNotifCheckingSeries(
-      String seriesName, int current, int total) {
+    String seriesName,
+    int current,
+    int total,
+  ) {
     return 'Checking $seriesName… ($current/$total)';
   }
 
@@ -5255,4 +5270,50 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get region => 'Region';
+
+  @override
+  String get sectionClientCertificate => 'Client Certificate';
+
+  @override
+  String get clientCertNone => 'No certificate configured';
+
+  @override
+  String get clientCertLoaded => 'Certificate loaded';
+
+  @override
+  String get clientCertImport => 'Import P12 Certificate';
+
+  @override
+  String get clientCertRemove => 'Remove Certificate';
+
+  @override
+  String get clientCertRemoveTitle => 'Remove client certificate?';
+
+  @override
+  String get clientCertRemoveConfirm =>
+      'The certificate will be removed from secure storage.';
+
+  @override
+  String get clientCertPassword => 'Certificate password';
+
+  @override
+  String get clientCertPasswordHint => 'Leave empty if no password';
+
+  @override
+  String get clientCertImportSuccess => 'Certificate imported';
+
+  @override
+  String get clientCertImportFailed =>
+      'Failed to import certificate. Check the password.';
+
+  @override
+  String get clientCertImportWrongPassword =>
+      'Wrong password or invalid P12 file';
+
+  @override
+  String get clientCertInfoTitle => 'Client Certificate (mTLS)';
+
+  @override
+  String get clientCertInfoContent =>
+      'Import a PKCS12 (.p12) client certificate to authenticate with servers that require mutual TLS. The certificate and password are stored in secure (encrypted) storage.';
 }

@@ -2830,7 +2830,10 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String autoSleepTimerEnabledSubtitle(
-      String start, String end, String duration) {
+    String start,
+    String end,
+    String duration,
+  ) {
     return '$start - $end · $duration';
   }
 
@@ -4223,7 +4226,13 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String statsScreenDateAtTime(
-      String month, int day, int year, int hour, String minute, String ampm) {
+    String month,
+    int day,
+    int year,
+    int hour,
+    String minute,
+    String ampm,
+  ) {
     return '$day. $month $year um $hour:$minute $ampm';
   }
 
@@ -4437,7 +4446,10 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String audibleSeriesSummaryWithUpcoming(
-      int total, int missing, int upcoming) {
+    int total,
+    int missing,
+    int upcoming,
+  ) {
     return '$total auf Audible · $missing fehlen · $upcoming kommend';
   }
 
@@ -5208,7 +5220,10 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String upcomingNotifCheckingSeries(
-      String seriesName, int current, int total) {
+    String seriesName,
+    int current,
+    int total,
+  ) {
     return 'Prüfe $seriesName… ($current/$total)';
   }
 
@@ -5314,4 +5329,50 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get region => 'Region';
+
+  @override
+  String get sectionClientCertificate => 'Client-Zertifikat';
+
+  @override
+  String get clientCertNone => 'Kein Zertifikat konfiguriert';
+
+  @override
+  String get clientCertLoaded => 'Zertifikat geladen';
+
+  @override
+  String get clientCertImport => 'P12-Zertifikat importieren';
+
+  @override
+  String get clientCertRemove => 'Zertifikat entfernen';
+
+  @override
+  String get clientCertRemoveTitle => 'Client-Zertifikat entfernen?';
+
+  @override
+  String get clientCertRemoveConfirm =>
+      'Das Zertifikat wird aus dem sicheren Speicher gelöscht.';
+
+  @override
+  String get clientCertPassword => 'Zertifikatspasswort';
+
+  @override
+  String get clientCertPasswordHint => 'Leer lassen, wenn kein Passwort';
+
+  @override
+  String get clientCertImportSuccess => 'Zertifikat importiert';
+
+  @override
+  String get clientCertImportFailed =>
+      'Import fehlgeschlagen. Passwort prüfen.';
+
+  @override
+  String get clientCertImportWrongPassword =>
+      'Falsches Passwort oder ungültige P12-Datei';
+
+  @override
+  String get clientCertInfoTitle => 'Client-Zertifikat (mTLS)';
+
+  @override
+  String get clientCertInfoContent =>
+      'Importiere ein PKCS12-Zertifikat (.p12) für die Authentifizierung bei Servern, die gegenseitiges TLS erfordern. Zertifikat und Passwort werden verschlüsselt gespeichert.';
 }

@@ -64,7 +64,7 @@ import 'app_localizations_zh.dart';
 /// property.
 abstract class AppLocalizations {
   AppLocalizations(String locale)
-      : localeName = intl.Intl.canonicalizedLocale(locale.toString());
+    : localeName = intl.Intl.canonicalizedLocale(locale.toString());
 
   final String localeName;
 
@@ -87,17 +87,17 @@ abstract class AppLocalizations {
   /// of delegates is preferred or required.
   static const List<LocalizationsDelegate<dynamic>> localizationsDelegates =
       <LocalizationsDelegate<dynamic>>[
-    delegate,
-    GlobalMaterialLocalizations.delegate,
-    GlobalCupertinoLocalizations.delegate,
-    GlobalWidgetsLocalizations.delegate,
-  ];
+        delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+      ];
 
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[
     Locale('de'),
     Locale('en'),
-    Locale('zh')
+    Locale('zh'),
   ];
 
   /// No description provided for @appTitle.
@@ -5145,7 +5145,10 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{start} – {end} · {duration}'**
   String autoSleepTimerEnabledSubtitle(
-      String start, String end, String duration);
+    String start,
+    String end,
+    String duration,
+  );
 
   /// No description provided for @endOfChapterShort.
   ///
@@ -7450,7 +7453,13 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{month} {day}, {year} at {hour}:{minute} {ampm}'**
   String statsScreenDateAtTime(
-      String month, int day, int year, int hour, String minute, String ampm);
+    String month,
+    int day,
+    int year,
+    int hour,
+    String minute,
+    String ampm,
+  );
 
   /// No description provided for @statsScreenMonthJan.
   ///
@@ -9131,6 +9140,90 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Region'**
   String get region;
+
+  /// No description provided for @sectionClientCertificate.
+  ///
+  /// In en, this message translates to:
+  /// **'Client Certificate'**
+  String get sectionClientCertificate;
+
+  /// No description provided for @clientCertNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No certificate configured'**
+  String get clientCertNone;
+
+  /// No description provided for @clientCertLoaded.
+  ///
+  /// In en, this message translates to:
+  /// **'Certificate loaded'**
+  String get clientCertLoaded;
+
+  /// No description provided for @clientCertImport.
+  ///
+  /// In en, this message translates to:
+  /// **'Import P12 Certificate'**
+  String get clientCertImport;
+
+  /// No description provided for @clientCertRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove Certificate'**
+  String get clientCertRemove;
+
+  /// No description provided for @clientCertRemoveTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove client certificate?'**
+  String get clientCertRemoveTitle;
+
+  /// No description provided for @clientCertRemoveConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'The certificate will be removed from secure storage.'**
+  String get clientCertRemoveConfirm;
+
+  /// No description provided for @clientCertPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Certificate password'**
+  String get clientCertPassword;
+
+  /// No description provided for @clientCertPasswordHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave empty if no password'**
+  String get clientCertPasswordHint;
+
+  /// No description provided for @clientCertImportSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Certificate imported'**
+  String get clientCertImportSuccess;
+
+  /// No description provided for @clientCertImportFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to import certificate. Check the password.'**
+  String get clientCertImportFailed;
+
+  /// No description provided for @clientCertImportWrongPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Wrong password or invalid P12 file'**
+  String get clientCertImportWrongPassword;
+
+  /// No description provided for @clientCertInfoTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Client Certificate (mTLS)'**
+  String get clientCertInfoTitle;
+
+  /// No description provided for @clientCertInfoContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Import a PKCS12 (.p12) client certificate to authenticate with servers that require mutual TLS. The certificate and password are stored in secure (encrypted) storage.'**
+  String get clientCertInfoContent;
 }
 
 class _AppLocalizationsDelegate
@@ -9162,8 +9255,9 @@ AppLocalizations lookupAppLocalizations(Locale locale) {
   }
 
   throw FlutterError(
-      'AppLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
-      'an issue with the localizations generation tool. Please file an issue '
-      'on GitHub with a reproducible sample app and the gen-l10n configuration '
-      'that was used.');
+    'AppLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
+    'an issue with the localizations generation tool. Please file an issue '
+    'on GitHub with a reproducible sample app and the gen-l10n configuration '
+    'that was used.',
+  );
 }

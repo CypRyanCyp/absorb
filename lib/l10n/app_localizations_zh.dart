@@ -2729,7 +2729,10 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String autoSleepTimerEnabledSubtitle(
-      String start, String end, String duration) {
+    String start,
+    String end,
+    String duration,
+  ) {
     return '$start – $end · $duration';
   }
 
@@ -4104,7 +4107,13 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String statsScreenDateAtTime(
-      String month, int day, int year, int hour, String minute, String ampm) {
+    String month,
+    int day,
+    int year,
+    int hour,
+    String minute,
+    String ampm,
+  ) {
     return '$month $day, $year at $hour:$minute $ampm';
   }
 
@@ -4315,7 +4324,10 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String audibleSeriesSummaryWithUpcoming(
-      int total, int missing, int upcoming) {
+    int total,
+    int missing,
+    int upcoming,
+  ) {
     return '$total on Audible · $missing missing · $upcoming upcoming';
   }
 
@@ -5074,7 +5086,10 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String upcomingNotifCheckingSeries(
-      String seriesName, int current, int total) {
+    String seriesName,
+    int current,
+    int total,
+  ) {
     return 'Checking $seriesName… ($current/$total)';
   }
 
@@ -5176,4 +5191,47 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get region => 'Region';
+
+  @override
+  String get sectionClientCertificate => '客户端证书';
+
+  @override
+  String get clientCertNone => '未配置证书';
+
+  @override
+  String get clientCertLoaded => '证书已加载';
+
+  @override
+  String get clientCertImport => '导入 P12 证书';
+
+  @override
+  String get clientCertRemove => '删除证书';
+
+  @override
+  String get clientCertRemoveTitle => '删除客户端证书？';
+
+  @override
+  String get clientCertRemoveConfirm => '证书将从安全存储中删除。';
+
+  @override
+  String get clientCertPassword => '证书密码';
+
+  @override
+  String get clientCertPasswordHint => '无密码请留空';
+
+  @override
+  String get clientCertImportSuccess => '证书导入成功';
+
+  @override
+  String get clientCertImportFailed => '导入失败，请检查密码。';
+
+  @override
+  String get clientCertImportWrongPassword => '密码错误或 P12 文件无效';
+
+  @override
+  String get clientCertInfoTitle => '客户端证书（mTLS）';
+
+  @override
+  String get clientCertInfoContent =>
+      '导入 PKCS12（.p12）客户端证书，用于与需要双向 TLS 的服务器进行身份验证。证书和密码将加密存储。';
 }

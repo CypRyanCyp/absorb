@@ -1822,5 +1822,20 @@
   "authorMergedInto": "Merged into {name}",
   "@authorMergedInto": { "placeholders": { "name": { "type": "String" } } },
   "authorQuickMatchHint": "Pull name, ASIN, description and image from Audible for the chosen region.",
-  "region": "Region"
+  "region": "Region",
+
+  "sectionClientCertificate": "Client Certificate",
+  "clientCertNone": "No certificate configured",
+  "clientCertLoaded": "Certificate loaded",
+  "clientCertImport": "Import P12 Certificate",
+  "clientCertRemove": "Remove Certificate",
+  "clientCertRemoveTitle": "Remove client certificate?",
+  "clientCertRemoveConfirm": "The certificate will be removed from secure storage.",
+  "clientCertPassword": "Certificate password",
+  "clientCertPasswordHint": "Leave empty if no password",
+  "clientCertImportSuccess": "Certificate imported",
+  "clientCertImportFailed": "Failed to import certificate. Check the password.",
+  "clientCertImportWrongPassword": "Wrong password or invalid P12 file",
+  "clientCertInfoTitle": "Client Certificate (mTLS)",
+  "clientCertInfoContent": "Import a PKCS12 (.p12) client certificate to authenticate with servers that require mutual TLS. The certificate and password are stored in secure (encrypted) storage."
 }

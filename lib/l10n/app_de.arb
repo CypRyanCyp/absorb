@@ -1649,5 +1649,20 @@
   "tipsRestored": "Tipps wiederhergestellt",
   "resetSpeedPresets": "Geschwindigkeits-Voreinstellungen zurücksetzen",
   "resetSpeedPresetsSubtitle": "Standard-Wiedergabegeschwindigkeiten wiederherstellen",
-  "speedPresetsReset": "Geschwindigkeits-Voreinstellungen zurückgesetzt"
+  "speedPresetsReset": "Geschwindigkeits-Voreinstellungen zurückgesetzt",
+
+  "sectionClientCertificate": "Client-Zertifikat",
+  "clientCertNone": "Kein Zertifikat konfiguriert",
+  "clientCertLoaded": "Zertifikat geladen",
+  "clientCertImport": "P12-Zertifikat importieren",
+  "clientCertRemove": "Zertifikat entfernen",
+  "clientCertRemoveTitle": "Client-Zertifikat entfernen?",
+  "clientCertRemoveConfirm": "Das Zertifikat wird aus dem sicheren Speicher gelöscht.",
+  "clientCertPassword": "Zertifikatspasswort",
+  "clientCertPasswordHint": "Leer lassen, wenn kein Passwort",
+  "clientCertImportSuccess": "Zertifikat importiert",
+  "clientCertImportFailed": "Import fehlgeschlagen. Passwort prüfen.",
+  "clientCertImportWrongPassword": "Falsches Passwort oder ungültige P12-Datei",
+  "clientCertInfoTitle": "Client-Zertifikat (mTLS)",
+  "clientCertInfoContent": "Importiere ein PKCS12-Zertifikat (.p12) für die Authentifizierung bei Servern, die gegenseitiges TLS erfordern. Zertifikat und Passwort werden verschlüsselt gespeichert."
 }

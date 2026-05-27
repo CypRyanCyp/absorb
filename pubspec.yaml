@@ -22,6 +22,10 @@ dependencies:
   
   # Storage
   shared_preferences: ^2.2.2
+  flutter_secure_storage: ^9.0.0
+
+  # mTLS P12 parsing
+  basic_utils: ^5.7.0
   
   # Dynamic Color (Material You)
   dynamic_color: ^1.6.8

@@ -18,6 +18,7 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'providers/auth_provider.dart';
 import 'providers/library_provider.dart';
 import 'services/audio_player_service.dart';
+import 'package:just_audio/just_audio.dart' show AudioPlayer;
 import 'services/api_service.dart';
 import 'services/download_service.dart';
 import 'services/download_notification_service.dart';
@@ -31,6 +32,7 @@ import 'services/carplay_service.dart';
 import 'services/chromecast_service.dart';
 import 'services/home_widget_service.dart';
 import 'services/log_service.dart';
+import 'services/mtls_service.dart';
 import 'services/quick_actions_service.dart';
 import 'services/wording.dart';
 import 'screens/login_screen.dart';
@@ -66,7 +68,11 @@ bool trustAllCerts = false;
 class _CertOverrides extends HttpOverrides {
   @override
   HttpClient createHttpClient(SecurityContext? context) {
-    final client = super.createHttpClient(context);
+    // Use mTLS SecurityContext when a client certificate is configured.
+    // Callers that pass their own context get it merged; callers that pass
+    // null fall through to our mTLS context or the platform default.
+    final effectiveContext = MtlsService.securityContext ?? context;
+    final client = super.createHttpClient(effectiveContext);
     // Always install the callback so it works even for HttpClient instances
     // created before trustAllCerts is loaded from SharedPreferences.
     // flutter_cache_manager (CachedNetworkImage) caches its HttpClient, so
@@ -151,6 +157,11 @@ void main() async {
   // Trust user-installed / self-signed certificates if the user opted in
   try {
     trustAllCerts = await PlayerSettings.getTrustAllCerts();
+  } catch (_) {}
+
+  // Load mTLS client certificate from secure storage (no-op if none stored)
+  try {
+    await MtlsService.init();
   } catch (_) {}
 
   // Capture Flutter framework errors (widget build failures, etc.)
@@ -493,6 +504,17 @@ class _AuthGateState extends State<AuthGate> {
       await AudioPlayerService.init().timeout(const Duration(seconds: 8));
     } catch (e) {
       debugPrint('[Init] AudioPlayerService.init timed out or failed: $e');
+    }
+    // Push mTLS client cert to ExoPlayer (no-op if none configured)
+    if (Platform.isAndroid && MtlsService.hasCert && MtlsService.p12Bytes != null) {
+      try {
+        await AudioPlayer.configureMtls(
+          Uint8List.fromList(MtlsService.p12Bytes!),
+          MtlsService.p12Password,
+        );
+      } catch (e) {
+        debugPrint('[Init] mTLS ExoPlayer config failed: $e');
+      }
     }
     // Route cold-start play() calls (headphones / lock screen tap before
     // the UI has bootstrapped the current item) through the existing

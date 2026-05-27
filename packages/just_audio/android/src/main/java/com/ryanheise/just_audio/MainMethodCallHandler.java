@@ -78,6 +78,17 @@ public class MainMethodCallHandler implements MethodCallHandler {
             result.success(null);
             break;
         }
+        case "configureMtls": {
+            byte[] p12Bytes = call.argument("p12Bytes");
+            String password = call.argument("password");
+            if (p12Bytes != null && p12Bytes.length > 0) {
+                MtlsHelper.configure(p12Bytes, password);
+            } else {
+                MtlsHelper.clear();
+            }
+            result.success(null);
+            break;
+        }
 
         default:
             result.notImplemented();

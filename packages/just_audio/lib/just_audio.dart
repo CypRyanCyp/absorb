@@ -82,6 +82,17 @@ class AudioPlayer {
     }
   }
 
+  /// Configure a PKCS12 client certificate for mTLS on Android (ExoPlayer).
+  /// Pass non-null [p12Bytes] and [password] to activate; pass nulls to clear.
+  static Future<void> configureMtls(
+      Uint8List? p12Bytes, String? password) async {
+    if (!Platform.isAndroid) return;
+    await _mainChannel.invokeMethod('configureMtls', {
+      'p12Bytes': p12Bytes,
+      'password': password,
+    });
+  }
+
   /// The user agent to set on all HTTP requests.
   final String? _userAgent;
 
