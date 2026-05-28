@@ -566,76 +566,31 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Future<void> _importClientCert() async {
     final l = AppLocalizations.of(context)!;
-    // Pick a .p12 or .pfx file
     final result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
       allowedExtensions: ['p12', 'pfx'],
       withData: true,
     );
-    if (result == null || result.files.isEmpty) return;
-    final file = result.files.first;
-    if (file.bytes == null) return;
-
-    // Ask for password
-    final passwordController = TextEditingController();
-    bool obscure = true;
+    final file = result?.files.firstOrNull;
+    if (file?.bytes == null) return;
     if (!mounted) return;
-    final password = await showDialog<String>(
-      context: context,
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setS) => AlertDialog(
-          title: Text(l.clientCertPassword),
-          content: TextField(
-            controller: passwordController,
-            obscureText: obscure,
-            decoration: InputDecoration(
-              hintText: l.clientCertPasswordHint,
-              suffixIcon: IconButton(
-                icon: Icon(obscure ? Icons.visibility_off : Icons.visibility),
-                onPressed: () => setS(() => obscure = !obscure),
-              ),
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx),
-              child: Text(l.cancel),
-            ),
-            FilledButton(
-              onPressed: () => Navigator.pop(ctx, passwordController.text),
-              child: Text(l.done),
-            ),
-          ],
-        ),
-      ),
-    );
-    passwordController.dispose();
+
+    final password = await _promptCertPassword(l);
     if (password == null) return;
 
     try {
-      await MtlsService.importP12(
-        file.bytes!.toList(),
-        password,
-        file.name,
-      );
-      // Push cert to ExoPlayer on Android
-      if (Platform.isAndroid && MtlsService.p12Bytes != null) {
-        await AudioPlayer.configureMtls(
-          Uint8List.fromList(MtlsService.p12Bytes!),
-          password,
-        );
-      }
+      await MtlsService.importP12(file!.bytes!, password, file.name);
+      await AudioPlayer.configureMtls(MtlsService.p12Bytes, password);
       if (!mounted) return;
       setState(() {
         _certLoaded = true;
         _certFilename = file.name;
       });
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(l.clientCertImportSuccess),
-        ));
-      }
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(l.clientCertImportSuccess),
+      ));
     } catch (e) {
+      debugPrint('[mTLS] Import failed: $e');
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(l.clientCertImportFailed),
@@ -644,7 +599,50 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
   }
 
-  Future<void> _removeClientCert(BuildContext context) async {
+  Future<String?> _promptCertPassword(AppLocalizations l) async {
+    final controller = TextEditingController();
+    try {
+      return await showDialog<String>(
+        context: context,
+        builder: (ctx) {
+          bool obscure = true;
+          return StatefulBuilder(
+            builder: (ctx, setS) => AlertDialog(
+              title: Text(l.clientCertPassword),
+              content: TextField(
+                controller: controller,
+                autofocus: true,
+                obscureText: obscure,
+                textInputAction: TextInputAction.done,
+                onSubmitted: (_) => Navigator.pop(ctx, controller.text),
+                decoration: InputDecoration(
+                  hintText: l.clientCertPasswordHint,
+                  suffixIcon: IconButton(
+                    icon: Icon(obscure ? Icons.visibility_off : Icons.visibility),
+                    onPressed: () => setS(() => obscure = !obscure),
+                  ),
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  child: Text(l.cancel),
+                ),
+                FilledButton(
+                  onPressed: () => Navigator.pop(ctx, controller.text),
+                  child: Text(l.done),
+                ),
+              ],
+            ),
+          );
+        },
+      );
+    } finally {
+      controller.dispose();
+    }
+  }
+
+  Future<void> _removeClientCert() async {
     final l = AppLocalizations.of(context)!;
     final confirmed = await showDialog<bool>(
       context: context,
@@ -665,9 +663,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
     if (confirmed != true) return;
     await MtlsService.remove();
-    if (Platform.isAndroid) {
-      await AudioPlayer.configureMtls(null, null);
-    }
+    await AudioPlayer.configureMtls(null, null);
     if (!mounted) return;
     setState(() {
       _certLoaded = false;
@@ -2348,21 +2344,24 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ),
                     const Divider(height: 1, indent: 16, endIndent: 16),
                     ListTile(
-                      leading: Icon(Icons.verified_user_rounded, color: _certLoaded ? Colors.greenAccent.shade400 : cs.onSurfaceVariant),
+                      leading: Icon(Icons.verified_user_rounded,
+                          color: _certLoaded ? Colors.greenAccent.shade400 : cs.onSurfaceVariant),
                       title: Row(children: [
                         Flexible(child: Text(l.sectionClientCertificate)),
                         _infoIcon(l.clientCertInfoTitle, l.clientCertInfoContent),
                       ]),
                       subtitle: Text(
-                        _certLoaded
-                            ? '${l.clientCertLoaded}: ${_certFilename ?? ''}'
-                            : l.clientCertNone,
+                        !_certLoaded
+                            ? l.clientCertNone
+                            : (_certFilename?.isNotEmpty ?? false)
+                                ? '${l.clientCertLoaded}: $_certFilename'
+                                : l.clientCertLoaded,
                         style: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant)),
                       trailing: _certLoaded
                           ? IconButton(
                               icon: Icon(Icons.delete_outline_rounded, color: cs.error),
                               tooltip: l.clientCertRemove,
-                              onPressed: _loaded ? () => _removeClientCert(context) : null,
+                              onPressed: _loaded ? _removeClientCert : null,
                             )
                           : IconButton(
                               icon: Icon(Icons.upload_file_rounded, color: cs.primary),

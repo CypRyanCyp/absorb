@@ -506,12 +506,10 @@ class _AuthGateState extends State<AuthGate> {
       debugPrint('[Init] AudioPlayerService.init timed out or failed: $e');
     }
     // Push mTLS client cert to ExoPlayer (no-op if none configured)
-    if (Platform.isAndroid && MtlsService.hasCert && MtlsService.p12Bytes != null) {
+    if (Platform.isAndroid && MtlsService.hasCert) {
       try {
         await AudioPlayer.configureMtls(
-          Uint8List.fromList(MtlsService.p12Bytes!),
-          MtlsService.p12Password,
-        );
+            MtlsService.p12Bytes, MtlsService.p12Password);
       } catch (e) {
         debugPrint('[Init] mTLS ExoPlayer config failed: $e');
       }

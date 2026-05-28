@@ -7,11 +7,9 @@ import java.security.NoSuchAlgorithmException;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSocketFactory;
 
 class MtlsHelper {
     private static final String TAG = "MtlsHelper";
-    private static volatile SSLSocketFactory sCustomFactory;
 
     static synchronized void configure(byte[] p12Bytes, String password) {
         try {
@@ -23,11 +21,10 @@ class MtlsHelper {
             kmf.init(ks, pwd);
             SSLContext sslCtx = SSLContext.getInstance("TLS");
             sslCtx.init(kmf.getKeyManagers(), null, null);
-            sCustomFactory = sslCtx.getSocketFactory();
             // Set globally so ExoPlayer's DefaultHttpDataSource (which opens
             // plain HttpURLConnection/HttpsURLConnection) picks up the client cert.
             // There is no per-connection injection point on DefaultHttpDataSource.
-            HttpsURLConnection.setDefaultSSLSocketFactory(sCustomFactory);
+            HttpsURLConnection.setDefaultSSLSocketFactory(sslCtx.getSocketFactory());
             Log.i(TAG, "mTLS client certificate configured");
         } catch (Exception e) {
             Log.e(TAG, "Failed to configure mTLS: " + e.getMessage());
@@ -35,7 +32,6 @@ class MtlsHelper {
     }
 
     static synchronized void clear() {
-        sCustomFactory = null;
         try {
             // setDefaultSSLSocketFactory(null) throws NPE; restore the JVM default instead.
             HttpsURLConnection.setDefaultSSLSocketFactory(
