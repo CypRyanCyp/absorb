@@ -24,6 +24,9 @@ class MtlsHelper {
             SSLContext sslCtx = SSLContext.getInstance("TLS");
             sslCtx.init(kmf.getKeyManagers(), null, null);
             sCustomFactory = sslCtx.getSocketFactory();
+            // Set globally so ExoPlayer's DefaultHttpDataSource (which opens
+            // plain HttpURLConnection/HttpsURLConnection) picks up the client cert.
+            // There is no per-connection injection point on DefaultHttpDataSource.
             HttpsURLConnection.setDefaultSSLSocketFactory(sCustomFactory);
             Log.i(TAG, "mTLS client certificate configured");
         } catch (Exception e) {
@@ -34,7 +37,7 @@ class MtlsHelper {
     static synchronized void clear() {
         sCustomFactory = null;
         try {
-            // Reset to JVM default
+            // setDefaultSSLSocketFactory(null) throws NPE; restore the JVM default instead.
             HttpsURLConnection.setDefaultSSLSocketFactory(
                     SSLContext.getDefault().getSocketFactory());
         } catch (NoSuchAlgorithmException e) {

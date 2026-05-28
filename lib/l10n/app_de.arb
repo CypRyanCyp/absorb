@@ -1662,7 +1662,6 @@
   "clientCertPasswordHint": "Leer lassen, wenn kein Passwort",
   "clientCertImportSuccess": "Zertifikat importiert",
   "clientCertImportFailed": "Import fehlgeschlagen. Passwort prüfen.",
-  "clientCertImportWrongPassword": "Falsches Passwort oder ungültige P12-Datei",
   "clientCertInfoTitle": "Client-Zertifikat (mTLS)",
   "clientCertInfoContent": "Importiere ein PKCS12-Zertifikat (.p12) für die Authentifizierung bei Servern, die gegenseitiges TLS erfordern. Zertifikat und Passwort werden verschlüsselt gespeichert."
 }

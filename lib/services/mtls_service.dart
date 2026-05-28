@@ -52,6 +52,8 @@ class MtlsService {
   static Future<void> _parseAndStore(
       List<int> bytes, String password, String filename) async {
     // Returns a list of PEM strings: private key + certificate(s)
+    // parsePkcs12 treats null as "no password"; an empty string triggers the
+    // PKCS12 password-formatting path and causes a parse failure on unencrypted P12s.
     final pems = Pkcs12Utils.parsePkcs12(
       Uint8List.fromList(bytes),
       password: password.isEmpty ? null : password,

@@ -1835,7 +1835,6 @@
   "clientCertPasswordHint": "Leave empty if no password",
   "clientCertImportSuccess": "Certificate imported",
   "clientCertImportFailed": "Failed to import certificate. Check the password.",
-  "clientCertImportWrongPassword": "Wrong password or invalid P12 file",
   "clientCertInfoTitle": "Client Certificate (mTLS)",
   "clientCertInfoContent": "Import a PKCS12 (.p12) client certificate to authenticate with servers that require mutual TLS. The certificate and password are stored in secure (encrypted) storage."
 }

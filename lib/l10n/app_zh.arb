@@ -841,7 +841,6 @@
   "clientCertPasswordHint": "无密码请留空",
   "clientCertImportSuccess": "证书导入成功",
   "clientCertImportFailed": "导入失败，请检查密码。",
-  "clientCertImportWrongPassword": "密码错误或 P12 文件无效",
   "clientCertInfoTitle": "客户端证书（mTLS）",
   "clientCertInfoContent": "导入 PKCS12（.p12）客户端证书，用于与需要双向 TLS 的服务器进行身份验证。证书和密码将加密存储。"
 }
