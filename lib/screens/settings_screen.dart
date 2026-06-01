@@ -580,7 +580,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     try {
       await MtlsService.importP12(file!.bytes!, password, file.name);
-      await AudioPlayer.configureMtls(MtlsService.p12Bytes, password);
       if (!mounted) return;
       setState(() {
         _certLoaded = true;
@@ -663,7 +662,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
     if (confirmed != true) return;
     await MtlsService.remove();
-    await AudioPlayer.configureMtls(null, null);
     if (!mounted) return;
     setState(() {
       _certLoaded = false;

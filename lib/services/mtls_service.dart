@@ -3,14 +3,21 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:basic_utils/basic_utils.dart';
+import 'package:just_audio/just_audio.dart' show AudioPlayer;
 
 /// Manages a PKCS12 client certificate for mTLS-protected servers.
 ///
-/// The encrypted P12 bytes, password, and filename are persisted to
-/// platform secure storage (Android Keystore / iOS Keychain) and parsed on
-/// startup into a Dart [SecurityContext] that the global [HttpOverrides]
-/// injects into every HttpClient. The Android audio path consumes the raw
-/// bytes through a method-channel call into ExoPlayer.
+/// The encrypted P12 bytes, password, and filename are persisted to platform
+/// secure storage (Android Keystore / iOS Keychain) and parsed on startup into
+/// a Dart [SecurityContext] that the global [HttpOverrides] injects into every
+/// HttpClient. The Android audio path consumes the raw bytes through a
+/// method-channel call into ExoPlayer.
+///
+/// Security: the raw P12 bytes and password are never kept in a long-lived
+/// field. After parsing, the private key survives only inside the native
+/// [SecurityContext] (Dart TLS) and ExoPlayer's SSLContext (audio). Code that
+/// needs the raw bytes again re-reads them transiently from secure storage so
+/// they become garbage-collectable the moment the call returns.
 class MtlsService {
   static const _storage = FlutterSecureStorage(
     aOptions: AndroidOptions(encryptedSharedPreferences: true),
@@ -21,13 +28,9 @@ class MtlsService {
   static const _kFilename = 'mtls_p12_filename';
 
   static SecurityContext? _securityContext;
-  static Uint8List? _p12Bytes;
-  static String? _p12Password;
   static String? _p12Filename;
 
   static SecurityContext? get securityContext => _securityContext;
-  static Uint8List? get p12Bytes => _p12Bytes;
-  static String? get p12Password => _p12Password;
   static String? get p12Filename => _p12Filename;
   static bool get hasCert => _securityContext != null;
 
@@ -40,36 +43,53 @@ class MtlsService {
       if (b64 == null) return;
       final pwd = await _storage.read(key: _kPassword) ?? '';
       final fname = await _storage.read(key: _kFilename);
-      await _parseAndStore(base64.decode(b64), pwd, fname);
+      _parse(base64.decode(b64), pwd);
+      _p12Filename = fname;
     } catch (e) {
       debugPrint('[mTLS] init failed: $e');
     }
   }
 
   /// Import a P12 file. Throws on wrong password or parse error; on success
-  /// the cert is activated in-memory and persisted to secure storage.
+  /// the cert is activated in-memory, persisted to secure storage, and pushed
+  /// to the ExoPlayer audio path.
   static Future<void> importP12(
       Uint8List bytes, String password, String filename) async {
     // Parse first — any failure aborts before we touch storage.
-    await _parseAndStore(bytes, password, filename);
+    _parse(bytes, password);
+    _p12Filename = filename;
     await _storage.write(key: _kP12Base64, value: base64.encode(bytes));
     await _storage.write(key: _kPassword, value: password);
     await _storage.write(key: _kFilename, value: filename);
+    await configureAudioPlayer();
   }
 
-  /// Remove the stored cert and clear all in-memory state.
+  /// Remove the stored cert and clear all in-memory and ExoPlayer state.
   static Future<void> remove() async {
     _securityContext = null;
-    _p12Bytes = null;
-    _p12Password = null;
     _p12Filename = null;
     await _storage.delete(key: _kP12Base64);
     await _storage.delete(key: _kPassword);
     await _storage.delete(key: _kFilename);
+    if (Platform.isAndroid) {
+      await AudioPlayer.configureMtls(null, null);
+    }
   }
 
-  static Future<void> _parseAndStore(
-      Uint8List bytes, String password, String? filename) async {
+  /// Push the configured client cert to ExoPlayer (Android audio path). Reads
+  /// the P12 from secure storage transiently so the raw bytes never live in a
+  /// long-lived field. No-op on non-Android or when no cert is configured.
+  static Future<void> configureAudioPlayer() async {
+    if (!Platform.isAndroid || _securityContext == null) return;
+    final b64 = await _storage.read(key: _kP12Base64);
+    if (b64 == null) return;
+    final pwd = await _storage.read(key: _kPassword) ?? '';
+    await AudioPlayer.configureMtls(base64.decode(b64), pwd);
+  }
+
+  /// Parse [bytes] into [_securityContext]. The bytes/password are consumed
+  /// here and intentionally not retained.
+  static void _parse(Uint8List bytes, String password) {
     // parsePkcs12 treats null as "no password"; an empty string triggers the
     // password-formatting path and fails on unencrypted P12s.
     final pems = Pkcs12Utils.parsePkcs12(
@@ -87,9 +107,6 @@ class MtlsService {
     ctx.usePrivateKeyBytes(utf8.encode(keyPems.first));
 
     _securityContext = ctx;
-    _p12Bytes = bytes;
-    _p12Password = password;
-    _p12Filename = filename;
   }
 
   static bool _isCertificate(String pem) => pem.contains('BEGIN CERTIFICATE');

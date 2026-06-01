@@ -18,7 +18,6 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'providers/auth_provider.dart';
 import 'providers/library_provider.dart';
 import 'services/audio_player_service.dart';
-import 'package:just_audio/just_audio.dart' show AudioPlayer;
 import 'services/api_service.dart';
 import 'services/download_service.dart';
 import 'services/download_notification_service.dart';
@@ -506,13 +505,10 @@ class _AuthGateState extends State<AuthGate> {
       debugPrint('[Init] AudioPlayerService.init timed out or failed: $e');
     }
     // Push mTLS client cert to ExoPlayer (no-op if none configured)
-    if (Platform.isAndroid && MtlsService.hasCert) {
-      try {
-        await AudioPlayer.configureMtls(
-            MtlsService.p12Bytes, MtlsService.p12Password);
-      } catch (e) {
-        debugPrint('[Init] mTLS ExoPlayer config failed: $e');
-      }
+    try {
+      await MtlsService.configureAudioPlayer();
+    } catch (e) {
+      debugPrint('[Init] mTLS ExoPlayer config failed: $e');
     }
     // Route cold-start play() calls (headphones / lock screen tap before
     // the UI has bootstrapped the current item) through the existing
